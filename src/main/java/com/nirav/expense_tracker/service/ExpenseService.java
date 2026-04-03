@@ -71,8 +71,11 @@ public class ExpenseService {
     }
 
     public Double getTotalExpenses(User user) {
-        Double total = expenseRepository.getTotalExpensesByUser(user);
-        return total != null ? total : 0.0;
+        List<Expense> expenses = expenseRepository.findByUser(user);
+        if (expenses == null || expenses.isEmpty()) {
+            return 0.0;
+        }
+        return expenses.stream().mapToDouble(Expense::getAmount).sum();
     }
 
     public List<CategoryWiseExpense> getCategoryWiseExpenses(User user) {

@@ -14,7 +14,6 @@ public class CategoryWiseExpense {
     public String getCategoryName() {
         return categoryName;
     }
-
     public Double getTotalAmount() {
         return totalAmount;
     }
@@ -23,7 +22,6 @@ public class CategoryWiseExpense {
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
     }
-
     public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
     }
