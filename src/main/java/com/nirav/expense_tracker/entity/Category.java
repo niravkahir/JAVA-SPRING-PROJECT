@@ -1,7 +1,7 @@
 package com.nirav.expense_tracker.entity;
 
-import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 

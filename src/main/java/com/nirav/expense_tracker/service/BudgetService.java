@@ -2,9 +2,11 @@ package com.nirav.expense_tracker.service;
 
 import com.nirav.expense_tracker.entity.Budget;
 import com.nirav.expense_tracker.entity.User;
+import com.nirav.expense_tracker.exception.ResourceNotFoundException;
 import com.nirav.expense_tracker.repository.BudgetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.YearMonth;
 
 @Service
@@ -17,6 +19,10 @@ public class BudgetService {
     private ExpenseService expenseService;
 
     public Budget setBudget(Double monthlyLimit, User user) {
+        if (monthlyLimit == null || monthlyLimit <= 0) {
+            throw new IllegalArgumentException("Monthly limit must be greater than 0");
+        }
+
         String currentMonth = YearMonth.now().toString();
 
         Budget budget = budgetRepository.findByUserAndMonth(user, currentMonth)

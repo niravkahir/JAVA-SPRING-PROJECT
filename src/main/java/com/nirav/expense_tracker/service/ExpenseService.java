@@ -5,10 +5,13 @@ import com.nirav.expense_tracker.dto.ExpenseDTO;
 import com.nirav.expense_tracker.entity.Category;
 import com.nirav.expense_tracker.entity.Expense;
 import com.nirav.expense_tracker.entity.User;
+import com.nirav.expense_tracker.exception.ResourceNotFoundException;
+import com.nirav.expense_tracker.exception.UnauthorizedAccessException;
 import com.nirav.expense_tracker.repository.CategoryRepository;
 import com.nirav.expense_tracker.repository.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +27,7 @@ public class ExpenseService {
 
     public Expense addExpense(ExpenseDTO expenseDTO, User user) {
         Category category = categoryRepository.findById(expenseDTO.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", expenseDTO.getCategoryId()));
 
         Expense expense = new Expense();
         expense.setAmount(expenseDTO.getAmount());
@@ -42,14 +45,14 @@ public class ExpenseService {
 
     public Expense updateExpense(Long id, ExpenseDTO expenseDTO, User user) {
         Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", id));
 
         if (!expense.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("You can only update your own expenses");
+            throw new UnauthorizedAccessException("You can only update your own expenses", user.getUsername());
         }
 
         Category category = categoryRepository.findById(expenseDTO.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", expenseDTO.getCategoryId()));
 
         expense.setAmount(expenseDTO.getAmount());
         expense.setDate(expenseDTO.getDate());
@@ -61,10 +64,10 @@ public class ExpenseService {
 
     public void deleteExpense(Long id, User user) {
         Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", id));
 
         if (!expense.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("You can only delete your own expenses");
+            throw new UnauthorizedAccessException("You can only delete your own expenses", user.getUsername());
         }
 
         expenseRepository.delete(expense);

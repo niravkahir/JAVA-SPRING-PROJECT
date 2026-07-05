@@ -1,8 +1,11 @@
 package com.nirav.expense_tracker.controller;
 
+import com.nirav.expense_tracker.dto.response.ApiResponse;
 import com.nirav.expense_tracker.entity.User;
+import com.nirav.expense_tracker.exception.UnauthorizedAccessException;
 import com.nirav.expense_tracker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,28 +17,33 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/{username}")
-    public User getUserByUsername(@PathVariable String username) {
+    public ResponseEntity<ApiResponse<User>> getUserByUsername(@PathVariable String username) {
         String currentUsername = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         User currentUser = userService.findByUsername(currentUsername);
 
         if ("ADMIN".equals(currentUser.getRole())) {
-            return userService.findByUsername(username);
+            User user = userService.findByUsername(username);
+            return ResponseEntity.ok(ApiResponse.success("User retrieved successfully", user));
         }
 
         if (!currentUsername.equals(username)) {
-            throw new RuntimeException("You can only view your own profile. " +
-                    "You are logged in as: " + currentUsername +
-                    " but trying to view: " + username);
+            throw new UnauthorizedAccessException(
+                    "You can only view your own profile. You are logged in as: " + currentUsername +
+                            " but trying to view: " + username,
+                    currentUsername
+            );
         }
 
-        return userService.findByUsername(username);
+        User user = userService.findByUsername(username);
+        return ResponseEntity.ok(ApiResponse.success("User retrieved successfully", user));
     }
 
     @GetMapping("/profile")
-    public User getProfile() {
+    public ResponseEntity<ApiResponse<User>> getProfile() {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
-        return userService.findByUsername(username);
+        User user = userService.findByUsername(username);
+        return ResponseEntity.ok(ApiResponse.success("Profile retrieved successfully", user));
     }
 }

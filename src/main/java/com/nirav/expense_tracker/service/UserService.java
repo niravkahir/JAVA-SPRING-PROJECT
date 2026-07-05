@@ -2,6 +2,8 @@ package com.nirav.expense_tracker.service;
 
 import com.nirav.expense_tracker.dto.RegisterRequest;
 import com.nirav.expense_tracker.entity.User;
+import com.nirav.expense_tracker.exception.DuplicateResourceException;
+import com.nirav.expense_tracker.exception.ResourceNotFoundException;
 import com.nirav.expense_tracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,10 +22,10 @@ public class UserService {
 
     public User registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new DuplicateResourceException("User", "username", request.getUsername());
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateResourceException("User", "email", request.getEmail());
         }
 
         String role = request.getRole();
@@ -45,12 +47,12 @@ public class UserService {
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
     }
 
     public User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
     }
 
     public List<User> getAllUsers() {
