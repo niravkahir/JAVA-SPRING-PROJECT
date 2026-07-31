@@ -2,16 +2,25 @@ package com.nirav.expense_tracker.repository;
 
 import com.nirav.expense_tracker.entity.Expense;
 import com.nirav.expense_tracker.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import java.time.LocalDate;
 import java.util.List;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
+
     List<Expense> findByUser(User user);
+
     List<Expense> findByUserAndDateBetween(User user, LocalDate startDate, LocalDate endDate);
 
     @Query("SELECT e.category.name, SUM(e.amount) FROM Expense e WHERE e.user = :user GROUP BY e.category.name")
     List<Object[]> getCategoryWiseExpenses(@Param("user") User user);
+
+    Page<Expense> findByUser(User user, Pageable pageable);
+
+    Page<Expense> findByUserAndDateBetween(User user, LocalDate startDate, LocalDate endDate, Pageable pageable);
 }

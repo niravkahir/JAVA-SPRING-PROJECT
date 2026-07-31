@@ -10,6 +10,10 @@ import com.nirav.expense_tracker.exception.UnauthorizedAccessException;
 import com.nirav.expense_tracker.repository.CategoryRepository;
 import com.nirav.expense_tracker.repository.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -39,8 +43,30 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
+    // OLD: Get all expenses (no pagination)
     public List<Expense> getUserExpenses(User user) {
         return expenseRepository.findByUser(user);
+    }
+
+    // NEW: Get paginated expenses
+    public Page<Expense> getUserExpensesPaginated(User user, int page, int size, String sortBy, String direction) {
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return expenseRepository.findByUser(user, pageable);
+    }
+
+    // NEW: Get paginated expenses by date range
+    public Page<Expense> getExpensesByDateRangePaginated(User user, LocalDate start, LocalDate end,
+                                                         int page, int size, String sortBy, String direction) {
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return expenseRepository.findByUserAndDateBetween(user, start, end, pageable);
     }
 
     public Expense updateExpense(Long id, ExpenseDTO expenseDTO, User user) {
@@ -88,6 +114,7 @@ public class ExpenseService {
                 .collect(Collectors.toList());
     }
 
+    // OLD: Get expenses by date range
     public List<Expense> getExpensesByDateRange(User user, LocalDate start, LocalDate end) {
         return expenseRepository.findByUserAndDateBetween(user, start, end);
     }
